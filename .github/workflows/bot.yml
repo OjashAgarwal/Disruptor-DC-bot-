@@ -1,0 +1,68 @@
+name: Discord Bot 24/7
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Runs every 6 hours to keep the bot alive
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Run bot
+      env:
+        DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+        PORT: 3000
+      run: |
+        timeout 21600 npm start || true
+        # Runs for 6 hours (21600 seconds) then stops
+        
+    - name: Keep repository active
+      run: |
+        # This step helps keep the repository active
+        echo "Bot cycle completed at $(date)" >> activity.log
+        
+  # Separate job for UptimeRobot integration
+  uptime-robot-sync:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Start bot for UptimeRobot
+      env:
+        DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+        PORT: 3000
+        UPTIME_ROBOT_MODE: 'true'
+      run: |
+        # Run indefinitely when triggered by UptimeRobot
+        npm start
