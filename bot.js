@@ -8,6 +8,11 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.get('/', (req, res) => res.send('Bot is alive!'));
+app.listen(PORT, () => console.log(`Express server running on port ${PORT}`));
+
+
+
 // Bot Configuration
 const client = new Client({
     intents: [
