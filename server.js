@@ -4,16 +4,16 @@ const app = express();
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_TOKEN = process.env.GTHUB_TOKEN;
 const OWNER = 'VRGamerz9797';
 const REPO = 'discord-bot';
-const WORKFLOW_FILE = 'discord.yml'; // Replace with your actual workflow file name
+const WORKFLOW_FILE = 'bot.yml'; // Replace with your actual workflow file name
 
 async function triggerWorkflow(action) {
     const response = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW_FILE}/dispatches`, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${GITHUB_TOKEN}`,
+            'Authorization': `Bearer ${GTHUB_TOKEN}`,
             'Accept': 'application/vnd.github+json'
         },
         body: JSON.stringify({
