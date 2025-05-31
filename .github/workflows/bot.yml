@@ -13,56 +13,36 @@ on:
 jobs:
   keep-alive:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        # Removed cache: 'npm' to fix the lock file error
-        
-    - name: Install dependencies
-      run: npm install
-      
-    - name: Run bot
-      env:
-        DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-        PORT: 3000
-      run: |
-        timeout 21600 npm start || true
-        # Runs for 6 hours (21600 seconds) then stops
-        
-    - name: Keep repository active
-      run: |
-        # This step helps keep the repository active
-        echo "Bot cycle completed at $(date)" >> activity.log
-        
-  # Separate job for UptimeRobot integration
-  uptime-robot-sync:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run bot
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          PORT: 3000
+        run: |
+          timeout 21600 npm start || true
+          # Runs for 6 hours then stops
+
+      - name: Keep repository active
+        run: echo "Bot cycle completed at $(date)" >> activity.log
+
+  deploy-render:
+    name: Deploy to Render
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
-    
+    needs: keep-alive
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        # Removed cache: 'npm' to fix the lock file error
-        
-    - name: Install dependencies
-      run: npm install
-      
-    - name: Start bot for UptimeRobot
-      env:
-        DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-        PORT: 3000
-        UPTIME_ROBOT_MODE: 'true'
-      run: |
-        # Run indefinitely when triggered by UptimeRobot
-        npm start
+      - name: Trigger Render deploy
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" https://api.render.com/deploy/srv-d0t73lu3jp1c73e9j9mg?key=J51PUZg6f9k
