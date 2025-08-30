@@ -1,8 +1,8 @@
-name: Discord Bot 24/7
+##name: Discord Bot 24/7
 
-on:
-  push:
-    branches: [ main ]
+##on:
+ ## push:
+  ##  branches: [ main ]
   pull_request:
     branches: [ main ]
   schedule:
@@ -10,7 +10,7 @@ on:
     - cron: '0 */6 * * *'
   workflow_dispatch:
 
-jobs:
+##jobs:
   keep-alive:
     runs-on: ubuntu-latest
 
